@@ -20,7 +20,7 @@ let package = Package(
         .target(
             name: "ios-realm-swift",
             dependencies: [
-                .product(name: "Realm", package: "realm-swift"),
+                //.product(name: "Realm", package: "realm-swift"),
                 .product(name: "RealmSwift", package: "realm-swift")
             ]
         ),
