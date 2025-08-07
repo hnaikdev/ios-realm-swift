@@ -6,9 +6,9 @@
 //
 
 public protocol PersistenceServiceProtocol {
-    func store<P: PersistenceObject>(_ object: P) async throws
-    func remove<P: PersistenceObject>(_ object: P) async throws
-    func retrieve<P: PersistenceObject>(_ key: String) async throws -> P?
-    func retrieve<P: PersistenceObject>(_ keys: [String]) async throws -> [P]
-    func retrieve<P: PersistenceObject>(objectOfType: P.Type) async throws -> [P]
+    func store<P: PersistenceObject>(_ object: P) throws
+    func remove<P: PersistenceObject>(_ object: P) throws
+    func retrieve<P: PersistenceObject>(_ key: String) throws -> P?
+    func retrieve<P: PersistenceObject>(_ keys: [String]) throws -> [P]
+    func retrieve<P: PersistenceObject>(objectOfType: P.Type) throws -> [P]
 }
