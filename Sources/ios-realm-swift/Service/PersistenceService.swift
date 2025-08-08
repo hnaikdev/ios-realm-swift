@@ -20,7 +20,7 @@ public class PersistenceService: PersistenceServiceProtocol {
     public func store<P>(_ object: P) throws where P : PersistenceObject {
         let realm = try makeRealm()
         let persistedObject = PersistableObject()
-        persistedObject.key = object.key()
+        persistedObject.key = compositeKey(object)
         persistedObject.data = object.persistenceObject()
         
         guard let data = persistedObject.data else {
@@ -77,12 +77,12 @@ public class PersistenceService: PersistenceServiceProtocol {
         return results
     }
     
-    private func compositeKey<P: PersistenceObject>(_ object: P) -> NSString {
+    private func compositeKey<P: PersistenceObject>(_ object: P) -> String {
         return compositeKey(type: P.self, key: object.key())
     }
 
-    private func compositeKey<P: PersistenceObject>(type: P.Type, key: String) -> NSString {
-        return "\(type)-\(key)" as NSString
+    private func compositeKey<P: PersistenceObject>(type: P.Type, key: String) -> String {
+        return "\(type)-\(key)"
     }
     
     private func makeRealm() throws -> Realm {
