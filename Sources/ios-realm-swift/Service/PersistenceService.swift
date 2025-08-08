@@ -38,7 +38,7 @@ public class PersistenceService: PersistenceServiceProtocol {
     
     public func remove<P>(_ object: P) throws where P : PersistenceObject {
         var isRemoved = false
-        let key = object.key()
+        let key = compositeKey(object)
         let realm = try makeRealm()
         
         if let persistedObject = realm.object(ofType: PersistableObject.self, forPrimaryKey: key) {
