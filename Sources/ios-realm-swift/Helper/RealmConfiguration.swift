@@ -8,21 +8,39 @@
 import Foundation
 import RealmSwift
 
-struct RealmConfiguration {
+struct RealmConfiguration: Sendable {
     static var configuration: Realm.Configuration {
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            // Fallback to a default location
+            let temporaryDirectory = FileManager.default.temporaryDirectory
+            let file = temporaryDirectory.appendingPathComponent("swiftdata.realm")
+            return makeConfiguration(fileURL: file)
+        }
+        
         let file = url.appendingPathComponent("swiftdata.realm")
-        let config = Realm.Configuration(fileURL: file)
-        return config
+        return makeConfiguration(fileURL: file)
+    }
+    
+    private static func makeConfiguration(fileURL: URL) -> Realm.Configuration {
+        return Realm.Configuration(
+            fileURL: fileURL,
+            schemaVersion: 2, // Increment when schema changes
+            migrationBlock: { migration, oldSchemaVersion in
+                // Migration from @objcMembers to @Persisted
+                if oldSchemaVersion < 2 {
+                    // Realm will automatically handle the migration
+                    // since property names and types remain the same
+                }
+            }
+        )
     }
     
     static func createRealm(withConfiguration config: Realm.Configuration) throws -> Realm {
-        var realm: Realm!
         do {
-            realm = try Realm(configuration: config)
+            let realm = try Realm(configuration: config)
+            return realm
         } catch {
             throw PersistenceError.invalidConfiguration(error: error)
         }
-        return realm
     }
 }

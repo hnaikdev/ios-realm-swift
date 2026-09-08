@@ -8,11 +8,7 @@
 import Foundation
 import RealmSwift
 
-@objcMembers class PersistableObject: Object {
-    dynamic var key: String = ""
-    dynamic var data: Data?
-    
-    override static func primaryKey() -> String? {
-        return "key"
-    }
+final class PersistableObject: Object {
+    @Persisted(primaryKey: true) var key: String = ""
+    @Persisted var data: Data?
 }

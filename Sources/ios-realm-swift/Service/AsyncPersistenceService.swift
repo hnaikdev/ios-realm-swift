@@ -8,88 +8,100 @@
 import Foundation
 import RealmSwift
 
-public class AsyncPersistenceService: AsyncPersistenceServiceProtocol {
+public final class AsyncPersistenceService: AsyncPersistenceServiceProtocol, @unchecked Sendable {
     
     private let persistenceService: PersistenceServiceProtocol
+    private let queue: DispatchQueue
     
     public init() {
         self.persistenceService = PersistenceService()
+        self.queue = DispatchQueue(label: "com.asyncpersistence.queue", qos: .userInitiated)
     }
     
-    public func store<P>(_ object: P, completion: @escaping (PersistenceError?) -> Void) where P : PersistenceObject {
-        DispatchQueue.global().async { [weak self] in
-            guard let strongSelf = self else {
+    public func store<P>(_ object: P, completion: @escaping @Sendable (PersistenceError?) -> Void) where P : PersistenceObject {
+        queue.async { [weak self] in
+            guard let self else {
                 completion(.storeFailed)
                 return
             }
             
             do {
-                try strongSelf.persistenceService.store(object)
+                try self.persistenceService.store(object)
                 completion(nil)
+            } catch let error as PersistenceError {
+                completion(error)
             } catch {
-                completion(error as? PersistenceError)
+                completion(.storeFailed)
             }
         }
     }
     
-    public func remove<P>(_ object: P, completion: @escaping (PersistenceError?) -> Void) where P : PersistenceObject {
-        DispatchQueue.global().async { [weak self] in
-            guard let strongSelf = self else {
+    public func remove<P>(_ object: P, completion: @escaping @Sendable (PersistenceError?) -> Void) where P : PersistenceObject {
+        queue.async { [weak self] in
+            guard let self else {
                 completion(.removeFailed)
                 return
             }
             
             do {
-                try strongSelf.persistenceService.remove(object)
+                try self.persistenceService.remove(object)
                 completion(nil)
+            } catch let error as PersistenceError {
+                completion(error)
             } catch {
-                completion(error as? PersistenceError)
+                completion(.removeFailed)
             }
         }
     }
     
-    public func retrieve<P>(_ key: String, completion: @escaping (P?, PersistenceError?) -> Void) where P : PersistenceObject {
-        DispatchQueue.global().async { [weak self] in
-            guard let strongSelf = self else {
+    public func retrieve<P>(_ key: String, completion: @escaping @Sendable (P?, PersistenceError?) -> Void) where P : PersistenceObject {
+        queue.async { [weak self] in
+            guard let self else {
                 completion(nil, .retrieveFailed)
                 return
             }
             
             do {
-                let object: P? = try strongSelf.persistenceService.retrieve(key)
+                let object: P? = try self.persistenceService.retrieve(key)
                 completion(object, nil)
+            } catch let error as PersistenceError {
+                completion(nil, error)
             } catch {
                 completion(nil, .retrieveFailed)
             }
         }
     }
     
-    public func retrieve<P>(_ keys: [String], completion: @escaping ([P], PersistenceError?) -> Void) where P : PersistenceObject {
-        DispatchQueue.global().async { [weak self] in
-            guard let strongSelf = self else {
+    public func retrieve<P>(_ keys: [String], completion: @escaping @Sendable ([P], PersistenceError?) -> Void) where P : PersistenceObject {
+        queue.async { [weak self] in
+            guard let self else {
                 completion([], .retrieveFailed)
                 return
             }
             
             do {
-                let objects: [P] = try strongSelf.persistenceService.retrieve(keys)
+                let objects: [P] = try self.persistenceService.retrieve(keys)
                 completion(objects, nil)
+            } catch let error as PersistenceError {
+                completion([], error)
             } catch {
                 completion([], .retrieveFailed)
             }
         }
     }
     
-    public func retrieve<P>(objectOfType: P.Type, completion: @escaping ([P], PersistenceError?) -> Void) where P : PersistenceObject {
-        DispatchQueue.global().async { [weak self] in
-            guard let strongSelf = self else {
+    public func retrieve<P>(objectOfType: P.Type, completion: @escaping @Sendable ([P], PersistenceError?) -> Void) where P : PersistenceObject {
+        queue.async { [weak self] in
+            guard let self else {
                 completion([], .retrieveFailed)
                 return
             }
             
             do {
-                let objects: [P] = try strongSelf.persistenceService.retrieve(objectOfType: objectOfType)
+                let objects: [P] = try self.persistenceService.retrieve(objectOfType: objectOfType)
                 completion(objects, nil)
+            } catch let error as PersistenceError {
+                completion([], error)
             } catch {
                 completion([], .retrieveFailed)
             }

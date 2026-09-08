@@ -5,7 +5,7 @@
 //  Created by Hiral Naik on 8/6/25.
 //
 
-public protocol PersistenceServiceProtocol {
+public protocol PersistenceServiceProtocol: Sendable {
     func store<P: PersistenceObject>(_ object: P) throws
     func remove<P: PersistenceObject>(_ object: P) throws
     func retrieve<P: PersistenceObject>(_ key: String) throws -> P?

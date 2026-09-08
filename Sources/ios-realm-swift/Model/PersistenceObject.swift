@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol PersistenceObject {
+public protocol PersistenceObject: Sendable {
     init?(persistenceObj: Data)
     func key() -> String
     func persistenceObject() -> Data

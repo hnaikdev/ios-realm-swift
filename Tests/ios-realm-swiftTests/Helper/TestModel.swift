@@ -5,12 +5,11 @@
 //  Created by Hiral Naik on 8/25/25.
 //
 
-import Testing
 import Foundation
 @testable import ios_realm_swift
 
-struct TestModel: Codable, PersistenceObject {
-    let id: String
+struct TestModel: Codable, PersistenceObject, Sendable {
+    var id: String
     var name: String
     
     init(id: String, name: String) throws {
@@ -18,16 +17,18 @@ struct TestModel: Codable, PersistenceObject {
         self.name = name
     }
     
+    init?(persistenceObj: Data) {
+        guard let model = try? JSONDecoder().decode(TestModel.self, from: persistenceObj) else {
+            return nil
+        }
+        self = model
+    }
+    
     func key() -> String {
-        id
+        return id
     }
     
     func persistenceObject() -> Data {
-        try! JSONEncoder().encode(self)
-    }
-    
-    init?(persistenceObj: Data) {
-        guard let decoded = try? JSONDecoder().decode(TestModel.self, from: persistenceObj) else { return nil }
-        self = decoded
+        return (try? JSONEncoder().encode(self)) ?? Data()
     }
 }
